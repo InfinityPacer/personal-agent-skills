@@ -1,0 +1,4 @@
+interface:
+  display_name: "Personal Development Workflow"
+  short_description: "Cross-project development workflow guardrails"
+  default_prompt: "Use $personal-development-workflow to handle this development task with evidence, scoped execution, subagent coordination, and privacy-safe delivery."
