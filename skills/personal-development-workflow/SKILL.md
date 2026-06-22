@@ -11,7 +11,21 @@ description: Use when a task changes code, config, tests, runtime behavior, work
 - If a narrower project, repository, or domain skill applies, use it first. Treat this skill as the outer collaboration contract and let stricter local rules win.
 - When the user writes in Chinese, respond in Chinese by default. Be direct, concise, evidence-based, and focused on the requested terminal state.
 - Keep task mode in mind continuously. If the user shifts from bugfix to strategy, design, review, delivery, or rule-setting, adjust the work and output shape without turning the mode detection into a ceremony.
-- Treat subagents as normal collaboration for tasks that change behavior, require design or planning, need factual verification, affect durable rules, involve public delivery, or request Review/subagents. The main agent orchestrates fixed reviewer/research roles, passes explicit boundaries, integrates feedback, and remains accountable for the final decision.
+- Treat design judgment, task splitting, execution planning, and verification as default habits, scaled to the task's risk and durability. Do not force heavyweight specs, strict TDD, documentation files, or subagents onto simple work.
+- Treat strict workflow skills such as Superpowers as discipline inputs. Follow them when they match the task and current platform constraints; when they conflict with user instructions, project rules, or tool limits, the stricter applicable user/project/tool boundary wins.
+
+## Workflow Intensity
+
+- Read-only answers and factual checks: gather enough evidence, answer directly, and state unknowns. Use no design document, no commit, and no broad plan unless the user asks or accuracy risk is high. Subagents still require the authorization rules below.
+- Small reversible edits: make a brief design judgment, keep a short step list if useful, edit narrowly, and verify by readback, lint, render, or a focused command. Do not create durable docs by default.
+- Behavior or contract changes: identify the fact source, intended behavior, same-class risk, implementation steps, and verification strategy before editing. Prefer failing tests or concrete reproduction first.
+- Architecture, durable workflow, skill, public delivery, or multi-stage work: make the design and execution plan explicit, include acceptance and rollback/stop conditions where relevant, and use review gates appropriate to the risk.
+
+## Documentation Landing
+
+- Keep design and plan thinking in the chat or task plan by default. Land documents only when the user asks, the decision must survive context compaction, the work spans sessions or agents, public delivery needs a durable artifact, or architecture/workflow/skill rules are being established.
+- Use tracked project docs for maintainer-facing design, plans, and acceptance criteria. Use local scratch such as `docs/superpowers/...` only for private continuity or handoff, and do not commit it unless the user explicitly wants that artifact included.
+- When a strict workflow skill requires documentation but the task is small, satisfy the underlying need with a concise in-chat design and plan instead of creating files. Explain this only if it affects the user's requested terminal state.
 
 ## Evidence And Local Truth
 
@@ -51,7 +65,9 @@ description: Use when a task changes code, config, tests, runtime behavior, work
 
 ## Subagent Collaboration
 
-Custom agents are fixed role templates, not background services. When this workflow applies, the main agent explicitly spawns the relevant fixed agents for the current task, keeps design/implementation/integration ownership, and closes the loop on their feedback. Each subagent consumes its own tokens, time, and tool calls, so keep fan-out to the smallest set that materially improves independence, parallelism, or quality.
+Custom agents are fixed role templates, not background services. Skill text can recommend a reviewer, but it does not by itself authorize spawning. Only spawn when the user explicitly asks for subagents, parallel/delegated work, an independent agent Review, or when the current platform policy clearly allows it and the user grants permission after a short prompt.
+
+When spawning is authorized, the main agent keeps design/implementation/integration ownership, passes explicit boundaries, integrates feedback, and remains accountable for the final decision. Each subagent consumes its own tokens, time, and tool calls, so keep fan-out to the smallest set that materially improves independence, parallelism, or quality.
 
 Default roles:
 
@@ -71,7 +87,14 @@ Review budget:
 - Use `final-reviewer` when closure risk is real: public delivery, durable rules or skills, multiple reviewers, unresolved reviewer feedback, cross-contract behavior, or explicit user request. For a single focused implementation review with all feedback resolved, a main-thread closure summary is enough.
 - Do not rerun equivalent verification or Review unless new evidence, changed scope, failed verification, or unresolved feedback makes the previous pass stale.
 
-Default spawn points, subject to the review budget above:
+Authorization and prompt rules:
+
+- Treat phrases such as `subagent`, `parallel agent`, `delegate`, `开独立 agent`, `并行`, `独立 Review`, `reviewer agent`, or explicit approval after being asked as current-task authorization for the minimum necessary fan-out.
+- Treat plain `review`, `检查`, or `看一下` as main-thread review unless the user asks for independent/subagent review or the task's risk justifies asking for authorization.
+- If a task would materially benefit from an independent reviewer but the user did not authorize spawning, ask a short yes/no question before spawning. Continue in the main thread when the user declines or when waiting would be disproportionate.
+- Do not spawn for simple one-command answers, simple translations, low-risk read-only explanations, local cleanup that does not change behavior or durable rules, or when the user waives review. Public PR, release, issue, or review replies should ask for or use an authorized `delivery-reviewer` unless the user explicitly waives it.
+
+Candidate review points, subject to authorization and the review budget above:
 
 - Before design or architecture decisions: use `research-reviewer` if the domain or best practice is unfamiliar; use `design-reviewer` for the proposed direction.
 - Use `plan-reviewer` before implementation when the plan spans multiple files or phases, changes contracts, state lifecycle, public output, durable rules, or skills, or needs explicit acceptance criteria, rollback, migration, or parallel ownership.
@@ -80,8 +103,6 @@ Default spawn points, subject to the review budget above:
 - Before public delivery, PR, release, or issue/review reply: use `delivery-reviewer`.
 - Use `final-reviewer` only for the closure-risk cases listed in Review budget, unless the user explicitly requests final Review.
 - For parallel implementation or testing: use temporary workers only when ownership, files, expected output, and integration points are explicit and disjoint.
-
-Do not spawn for simple one-command answers, simple translations, read-only explanations that do not need fact verification, local cleanup that does not change behavior or durable rules, or when the user explicitly waives review. Public PR, release, issue, or review replies use `delivery-reviewer` unless the user explicitly waives it.
 
 Subagent prompts must include only:
 
