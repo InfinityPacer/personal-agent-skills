@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Session Metadata"
+  short_description: "Repair Codex session cwd and provider metadata."
+  default_prompt: "Use $codex-session-metadata to inspect or repair a Codex session's persisted cwd or provider bucket."
