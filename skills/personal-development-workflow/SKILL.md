@@ -11,21 +11,78 @@ description: Use when a task changes code, config, tests, runtime behavior, work
 - If a narrower project, repository, or domain skill applies, use it first. Treat this skill as the outer collaboration contract and let stricter local rules win.
 - When the user writes in Chinese, respond in Chinese by default. Be direct, concise, evidence-based, and focused on the requested terminal state.
 - Keep task mode in mind continuously. If the user shifts from bugfix to strategy, design, review, delivery, or rule-setting, adjust the work and output shape without turning the mode detection into a ceremony.
+- Treat the user's profile and local collaboration contract as the policy layer: they define goals, boundaries, evidence standards, same-class risk scanning, public-delivery hygiene, and when to stop.
+- Use Superpowers-style planning, task execution, review, and verification as the execution model for multi-stage development when it fits the task and current platform. The execution model must serve the user's profile, not replace it.
 - Treat design judgment, task splitting, execution planning, and verification as default habits, scaled to the task's risk and durability. Do not force heavyweight specs, strict TDD, documentation files, or subagents onto simple work.
-- Treat strict workflow skills such as Superpowers as discipline inputs. Follow them when they match the task and current platform constraints; when they conflict with user instructions, project rules, or tool limits, the stricter applicable user/project/tool boundary wins.
+- Do not silently downgrade from an authorized Superpowers/subagent-driven path to inline execution. If required agents, tools, permissions, or task independence are unavailable, state the reason, update the session ledger when one exists, and continue only with the safest equivalent path.
 
 ## Workflow Intensity
 
 - Read-only answers and factual checks: gather enough evidence, answer directly, and state unknowns. Use no design document, no commit, and no broad plan unless the user asks or accuracy risk is high. Subagents still require the authorization rules below.
 - Small reversible edits: make a brief design judgment, keep a short step list if useful, edit narrowly, and verify by readback, lint, render, or a focused command. Do not create durable docs by default.
 - Behavior or contract changes: identify the fact source, intended behavior, same-class risk, implementation steps, and verification strategy before editing. Prefer failing tests or concrete reproduction first.
-- Architecture, durable workflow, skill, public delivery, or multi-stage work: make the design and execution plan explicit, include acceptance and rollback/stop conditions where relevant, and use review gates appropriate to the risk.
+- Architecture, durable workflow, skill, public delivery, or multi-stage work: make the design and execution plan explicit, include acceptance and rollback/stop conditions where relevant, use Superpowers-style task decomposition when the work is executable in slices, and use review gates appropriate to the risk.
 
 ## Documentation Landing
 
 - Keep design and plan thinking in the chat or task plan by default. Land documents only when the user asks, the decision must survive context compaction, the work spans sessions or agents, public delivery needs a durable artifact, or architecture/workflow/skill rules are being established.
 - Use tracked project docs for maintainer-facing design, plans, and acceptance criteria. Use local scratch such as `docs/superpowers/...` only for private continuity or handoff, and do not commit it unless the user explicitly wants that artifact included.
 - When a strict workflow skill requires documentation but the task is small, satisfy the underlying need with a concise in-chat design and plan instead of creating files. Explain this only if it affects the user's requested terminal state.
+
+## Superpowers Execution Model
+
+- For multi-step implementation with an actionable plan, prefer the Superpowers shape: main owns orchestration and integration; bounded worker agents implement or verify independent plan slices when authorized and suitable; reviewer agents check specification fit, code quality, delivery, or final closure as gates.
+- Use the user's profile in every Superpowers step. Same-class risk scanning, evidence-first claims, scoped edits, public-delivery privacy, and user-stated boundaries belong in plan tasks, worker prompts, reviewer prompts, and final acceptance.
+- Main is the control-plane owner. It frames the design, approves or writes the plan, maintains the ledger when the current task boundary allows it, assigns agents, integrates results, verifies claims, and owns delivery. Worker agents can draft or implement; they do not own product direction, scope expansion, commits, pushes, releases, or public replies.
+- Use worker agents when the plan has clear, low-coupling ownership areas with explicit files, expected output, validation commands, same-class risk boundaries, and integration points. Main may implement directly for small, tightly coupled, risky, or authorization-limited work, but must report why when the user explicitly requested Superpowers/subagent-driven execution.
+- Keep review gates proportional. Superpowers discipline should improve reliability, not create ritual: ordinary focused changes usually need the single reviewer matching the main risk; public delivery, durable rules, cross-contract work, or unresolved feedback may need delivery/final review.
+
+## Session Ledger
+
+- Create or update a small session ledger when a task uses Goal mode, may cross context compaction, spans sessions, opens subagents, has pending review gates, or needs handoff.
+- Default path: `docs/superpowers/state/YYYY-MM-DD-<task>-ledger.md`, unless the project or user gives a better location. Use tracked docs only when the ledger is meant to be maintainer-facing; otherwise keep it as local continuity material.
+- If the user sets a read-only, no-file-changes, or no-ledger-write boundary, do not create or update a ledger file unless the user grants that specific write. Keep the same ledger fields in chat, task plan, or final handoff instead.
+- The ledger is the control-plane state, not a transcript. Keep only: objective, done criteria, user boundaries, current phase, branch/cwd, last completed step, next action, source docs, spawned agents, required review gates, verification commands, verification status, decisions, and resume protocol.
+- Goal text, implementation plans, and subagent prompts should point to the ledger when it exists. After compact, resume, or new-session handoff, read the ledger before relying on transcript memory. Ledger state outranks remembered agent/gate status.
+- Update the ledger before compact or handoff, after spawning an agent, after receiving agent results, when a required gate changes state, after a meaningful implementation slice, after verification, and before the final response. Do not paste raw logs or large diffs; link to source files, commands, or summarized evidence.
+- If the ledger says a required gate is pending, blocked, or unresolved, do not claim completion until the gate is resolved, replaced with equivalent evidence, or explicitly waived by the user.
+
+Minimum ledger shape:
+
+```markdown
+# <Task> Session Ledger
+
+## Objective
+- Goal:
+- Done when:
+- User boundaries:
+
+## Current State
+- Phase:
+- Branch/CWD:
+- Last completed:
+- Next action:
+
+## Sources
+- Design:
+- Plan:
+- Spec:
+
+## Agents And Gates
+| Agent | Role | Status | Gate | Expected output |
+| --- | --- | --- | --- | --- |
+
+## Verification
+- Required:
+- Last run:
+- Not verified:
+
+## Decisions
+- YYYY-MM-DD:
+
+## Resume Protocol
+Read this ledger first after compact/resume/new session. Continue from Current State, Agents And Gates, and Next action.
+```
 
 ## Evidence And Local Truth
 
@@ -65,12 +122,15 @@ description: Use when a task changes code, config, tests, runtime behavior, work
 
 ## Subagent Collaboration
 
-Custom agents are fixed role templates, not background services. Skill text can recommend a reviewer, but it does not by itself authorize spawning. Only spawn when the user explicitly asks for subagents, parallel/delegated work, an independent agent Review, or when the current platform policy clearly allows it and the user grants permission after a short prompt.
+Custom agents are fixed role templates, not background services. Skill text can recommend a worker or reviewer, but it does not by itself authorize spawning. Spawn when the user explicitly asks for subagents, parallel/delegated work, an independent agent Review, Superpowers/subagent-driven execution, or when the current platform policy clearly allows it and the user grants permission after a short prompt.
 
 When spawning is authorized, the main agent keeps design/implementation/integration ownership, passes explicit boundaries, integrates feedback, and remains accountable for the final decision. Each subagent consumes its own tokens, time, and tool calls, so keep fan-out to the smallest set that materially improves independence, parallelism, or quality.
 
 Default roles:
 
+- `design-drafter`: bounded design/proposal drafting or design-doc revision from known facts and user boundaries. It can prepare options and artifacts, but main owns the design decision.
+- `task-implementer`: bounded implementation slice from an approved plan, including focused tests and self-review.
+- `test-worker`: focused verification, reproduction, test execution, log triage, or non-overlapping test-hardening work.
 - `research-reviewer`: unfamiliar domains, official docs, standards, ecosystem practice, or privacy-safe community best-practice checks.
 - `design-reviewer`: product, design, architecture, workflow direction, business boundaries, lifecycle semantics, and same-class risk.
 - `plan-reviewer`: implementation plan, task split, dependency order, acceptance criteria, rollback, and verification strategy.
@@ -78,7 +138,7 @@ Default roles:
 - `delivery-reviewer`: PR, release, issue reply, public comments, privacy, scope, verification evidence, and maintainer-facing text.
 - `final-reviewer`: whole-task closure across user request, design, plan, implementation, tests, docs, delivery, and unresolved feedback.
 
-Keep fixed agents review/research-oriented by default. The main agent should normally draft the design, write the plan, implement code, run key verification, and integrate decisions. Spawn worker-style implementation or testing agents only when the task can be split into clear, low-coupling ownership areas with limited conflict risk.
+Do not use a design worker as an architecture owner. `design-drafter` may draft options, invariants, lifecycle notes, acceptance criteria, or a design document, but main must integrate the result, choose the direction, and send material design decisions through `design-reviewer` when the risk warrants it.
 
 Review budget:
 
@@ -89,30 +149,34 @@ Review budget:
 
 Authorization and prompt rules:
 
-- Treat phrases such as `subagent`, `parallel agent`, `delegate`, `开独立 agent`, `并行`, `独立 Review`, `reviewer agent`, or explicit approval after being asked as current-task authorization for the minimum necessary fan-out.
+- Treat phrases such as `subagent`, `parallel agent`, `delegate`, `开独立 agent`, `并行`, `独立 Review`, `reviewer agent`, `按 Superpowers 执行`, `Superpowers execution`, `subagent-driven`, or explicit approval after being asked as current-task authorization for the minimum necessary fan-out described by the task.
+- Treat "可以开 subagent" as authorization, not a mandate. Treat "按 Superpowers 执行", "subagent-driven", "必须开", "每个任务开 agent", or equivalent wording as a mandate to spawn when the task shape and platform allow it; if spawning is not possible, state why instead of silently executing inline.
 - Treat plain `review`, `检查`, or `看一下` as main-thread review unless the user asks for independent/subagent review or the task's risk justifies asking for authorization.
 - If a task would materially benefit from an independent reviewer but the user did not authorize spawning, ask a short yes/no question before spawning. Continue in the main thread when the user declines or when waiting would be disproportionate.
 - Do not spawn for simple one-command answers, simple translations, low-risk read-only explanations, local cleanup that does not change behavior or durable rules, or when the user waives review. Public PR, release, issue, or review replies should ask for or use an authorized `delivery-reviewer` unless the user explicitly waives it.
 
 Candidate review points, subject to authorization and the review budget above:
 
+- For design drafting: use `design-drafter` only when the desired artifact is explicit, source facts and user boundaries are known, and main will make the final decision.
 - Before design or architecture decisions: use `research-reviewer` if the domain or best practice is unfamiliar; use `design-reviewer` for the proposed direction.
 - Use `plan-reviewer` before implementation when the plan spans multiple files or phases, changes contracts, state lifecycle, public output, durable rules, or skills, or needs explicit acceptance criteria, rollback, migration, or parallel ownership.
 - For fact verification, choose the matching reviewer: `implementation-reviewer` for source behavior, code-path bugs, reviewer claims, and log symptoms; `research-reviewer` for official docs, standards, ecosystem facts, and community practice; `delivery-reviewer` for release artifacts, PR/issue facts, public text, and maintainer-facing delivery claims.
 - Use `implementation-reviewer` after a focused implementation slice when the main risk is code correctness, tests, contracts, maintainability, or same-class implementation paths. Skip a separate implementation review when an earlier reviewer already covered the same risk and no relevant implementation facts changed.
 - Before public delivery, PR, release, or issue/review reply: use `delivery-reviewer`.
 - Use `final-reviewer` only for the closure-risk cases listed in Review budget, unless the user explicitly requests final Review.
-- For parallel implementation or testing: use temporary workers only when ownership, files, expected output, and integration points are explicit and disjoint.
+- For implementation or testing delegation: use `task-implementer` or `test-worker` only when ownership, files, expected output, validation commands, same-class risk boundary, and integration points are explicit and sufficiently disjoint.
 
 Subagent prompts must include only:
 
 - target files, branch, or scope
 - user-stated boundaries and forbidden actions
-- explicit read-only instruction for reviewer/research agents: no file edits, no approval requests for write/publish actions, no commit, no push, no public comments, no release
+- same-class risk boundary: which adjacent paths to inspect, and when to report rather than edit
+- explicit role permission: reviewer/research agents are read-only; worker agents may edit only the assigned files or artifacts; no subagent may commit, push, publish, release, or make public comments unless the user explicitly grants that action
 - acceptance goals and expected output format
 - expected output language; default to Chinese when the user or task prompt is Chinese
 - necessary fact-source entry points
 - whether to wait synchronously or continue asynchronously
+- ledger path and reporting expectations when a session ledger exists
 
 Do not pass the main agent's conclusion, intended fix, or hidden rationale to independent reviewers unless the validation explicitly needs it. Substantive reviewer feedback must be fixed, verified, or rejected with evidence. Do not claim completion while a required review gate remains unresolved.
 

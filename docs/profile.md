@@ -56,11 +56,11 @@
 - 评审不只检查当前 diff，还应检查计划是否遗漏执行风险、测试是否覆盖真实风险、文档是否与实现语义一致、交付 workflow 是否会在后续阶段断裂。
 - 如果评审结论看起来漂亮但不可审计，应回到证据锚点；没有行号、章节、日志、命令或复现路径的判断不能作为最终依据。
 
-## 独立 Review 门禁
+## Worker / Review 协作门禁
 
 - 用户认为设计、计划、开发落地都应有 Review 意识；会改变行为、需要设计/计划、需要事实核验、影响长期规则、涉及公开交付，或用户要求独立 Review/subagent 的任务，在获得显式授权后适合 main agent 编排固定 subagent 角色做结对/对抗式协作，而不是把 subagent 仅作为偶发审查。
-- 固定 subagent 适合按职责拆分：design reviewer、plan reviewer、implementation reviewer、delivery reviewer、final reviewer；未知领域可增加 research reviewer 检查官方文档、标准和社区最佳实践。
-- 固定 agent 先以 reviewer/research 为主。main agent 保持主驾驶职责：整理设计草案、写计划、实现代码、跑关键验证、整合取舍；只有任务能拆成明确低耦合 ownership 时，才临时拉 worker 类 agent 并行开发或测试。
+- 固定 subagent 适合按职责拆分：design drafter、task implementer、test worker、design reviewer、plan reviewer、implementation reviewer、delivery reviewer、final reviewer；未知领域可增加 research reviewer 检查官方文档、标准和社区最佳实践。
+- 固定 agent 分为 worker 和 reviewer：worker 可承担设计起草、计划切片实现、测试验证等边界清楚的工作；reviewer/research 负责独立审查和事实核验。main agent 保持主驾驶职责：目标、状态、设计取舍、计划批准、任务分派、结果整合、关键验证和交付。
 - Codex 当前多代理能力需要区分“能力开启”和“spawn 授权”。`multi_agent = true`、agent 配置或 skill 建议只说明可用能力和倾向，不等于用户已授权当前任务拉起 subagent。
 - 用户明确说 `subagent`、`parallel agent`、`delegate`、`开独立 agent`、`并行`、`独立 Review`、`reviewer agent`，或在被询问后同意时，可视为当前任务的最小必要 fan-out 授权。
 - 普通的 `review`、`检查`、`看一下` 默认是主线程 Review；如果任务明显受益于独立 reviewer，应先短问是否授权拉起只读 agent，而不是把 skill 文本当授权。
@@ -98,9 +98,10 @@
 - 全局 skill 应优先路由到可用的项目专属 skill，再把这些个人偏好作为外层协作契约。
 - 全局落地应采用“两层设计”：固定 custom agents 负责稳定角色，global skill 负责规定 main agent 何时拉起、传什么边界、如何异步/等待、如何整合反馈。
 - 固定 custom agents 不是常驻后台服务，而是 main agent 在具体任务中显式 spawn 的角色模板。
-- 全局 skill 应把独立 Review 写成明确场景下的协作模式：设计、计划、实现、交付、最终收尾分别有对应 reviewer；开发和测试执行默认仍由 main 负责，只有可并行且 ownership 清楚时才临时分派 worker。
+- 全局 skill 应把用户画像作为政策层，把 Superpowers 风格的计划、任务分派、review 和验证作为多阶段开发执行层；Superpowers 不能覆盖用户边界、同类风险扫描、证据优先和交付卫生。
+- 全局 skill 应把 worker/reviewer 写成明确场景下的协作模式：设计起草、实现、测试可以在边界清楚时交给 worker；设计、计划、实现、交付、最终收尾分别有对应 reviewer。设计取舍、scope 扩张、公开交付和最终完成声明仍由 main 负责。
 - 全局 skill 应把 subagent 写成“显式授权或提示授权后执行”的动作，而不是把 Review 场景写成无条件 spawn；skill 建议不能绕过当前 Codex 多代理工具策略。
-- 全局 skill 应承接 Superpowers 的设计、计划、执行、验证和文档意识，但用任务强度裁剪落地形式；文档落盘不是所有任务的默认动作。
+- 全局 skill 应承接 Superpowers 的设计、计划、执行、验证和文档意识，但用任务强度裁剪落地形式；文档落盘不是所有任务的默认动作。长 goal、compact 风险、跨 session、subagent 和 review gate 应使用小型 session ledger 保存控制面状态。
 - 全局 skill 应要求 agent 在回答或实现前识别任务模式：诊断、设计、计划、开发、评审、测试、交付、复盘、规则沉淀分别需要不同输出结构。
 - 全局 skill 应要求 agent 主动做同类风险扫描和长期规则判断，但仍严格服从用户给出的边界，不把相邻路径复核变成无关扩张。
 - 全局 skill 应要求架构类任务先定位事实源、中心写入点、生命周期边界和现有 primitive，再提出重构或实现方案。
