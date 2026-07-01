@@ -125,9 +125,11 @@ Read this ledger first after compact/resume/new session. Continue from Current S
 
 ## Subagent Collaboration
 
-Custom agents are fixed role templates, not background services. Skill text can recommend a worker or reviewer, but it does not by itself authorize spawning. Spawn when the user explicitly asks for subagents, parallel/delegated work, an independent agent Review, Superpowers/subagent-driven execution, or when the current platform policy clearly allows it and the user grants permission after a short prompt.
+Subagents are execution capacity, not ceremony. When the platform provides subagents and a task has independent investigation, implementation, testing, or review slices, spawn the minimum useful set by default. Do not ask first unless spawning would cross a user boundary, create public effects, mutate durable global state, or materially change cost/risk.
 
-When spawning is authorized, the main agent keeps design/implementation/integration ownership, passes explicit boundaries, integrates feedback, and remains accountable for the final decision. Each subagent consumes its own tokens, time, and tool calls, so keep fan-out to the smallest set that materially improves independence, parallelism, or quality.
+Main remains the control plane: it owns scope, design decisions, integration, verification, and delivery. Workers execute bounded slices. Reviewers are read-only unless explicitly authorized. Each subagent consumes its own tokens, time, and tool calls, so keep fan-out to the smallest set that materially improves independence, parallelism, or quality.
+
+Do not spawn for trivial factual answers, simple translations, single-command checks, or tightly coupled edits where parallelism increases conflict risk.
 
 Default roles:
 
@@ -152,13 +154,13 @@ Review budget:
 
 Authorization and prompt rules:
 
-- Treat phrases such as `subagent`, `parallel agent`, `delegate`, `开独立 agent`, `并行`, `独立 Review`, `reviewer agent`, `按 Superpowers 执行`, `Superpowers execution`, `subagent-driven`, or explicit approval after being asked as current-task authorization for the minimum necessary fan-out described by the task.
-- Treat "可以开 subagent" as authorization, not a mandate. Treat "按 Superpowers 执行", "subagent-driven", "必须开", "每个任务开 agent", or equivalent wording as a mandate to spawn when the task shape and platform allow it; if spawning is not possible, state why instead of silently executing inline.
-- Treat plain `review`, `检查`, or `看一下` as main-thread review unless the user asks for independent/subagent review or the task's risk justifies asking for authorization.
-- If a task would materially benefit from an independent reviewer but the user did not authorize spawning, ask a short yes/no question before spawning. Continue in the main thread when the user declines or when waiting would be disproportionate.
+- Treat phrases such as `subagent`, `parallel agent`, `delegate`, `开独立 agent`, `并行`, `独立 Review`, `reviewer agent`, `按 Superpowers 执行`, `Superpowers execution`, `subagent-driven`, `可以开 subagent`, `必要时开`, or similar wording as authorization and preference for the minimum useful fan-out. If the task is non-trivial and independent slices exist, spawn instead of asking again.
+- Treat `按 Superpowers 执行`, `subagent-driven`, `必须开`, `每个任务开 agent`, or equivalent wording as a mandate to spawn when the task shape and platform allow it; if spawning is not possible, state why instead of silently executing inline.
+- Treat plain `review`, `检查`, or `看一下` as an independent read-only review request when the target is non-trivial code, workflow, delivery, or durable-rule work. Use main-thread review for simple text checks, translations, or low-risk factual review.
 - Do not spawn for simple one-command answers, simple translations, low-risk read-only explanations, local cleanup that does not change behavior or durable rules, or when the user waives review. Public PR, release, issue, or review replies should ask for or use an authorized `delivery-reviewer` unless the user explicitly waives it.
+- Ask before any subagent mutates global rules, global skills, persistent memory, cross-project tooling, public comments, releases, commits, pushes, or destructive cleanup.
 
-Candidate review points, subject to authorization and the review budget above:
+Candidate review points, gated by the default-spawn rules and review budget above:
 
 - For design drafting: use `design-drafter` only when the desired artifact is explicit, source facts and user boundaries are known, and main will make the final decision.
 - Before design or architecture decisions: use `research-reviewer` if the domain or best practice is unfamiliar; use `design-reviewer` for the proposed direction.
