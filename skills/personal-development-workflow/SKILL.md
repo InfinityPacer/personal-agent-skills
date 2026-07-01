@@ -39,15 +39,18 @@ description: Use when a task changes code, config, tests, runtime behavior, work
 
 ## Session Ledger
 
-- Create or update a small session ledger when a task uses Goal mode, may cross context compaction, spans sessions, opens subagents, has pending review gates, or needs handoff.
+- Create or update a small session ledger when a task uses Goal mode, may cross context compaction, spans sessions, opens subagents, has pending review gates, has multiple high-risk phases, or needs handoff.
 - Default path: `docs/superpowers/state/YYYY-MM-DD-<task>-ledger.md`, unless the project or user gives a better location. Use tracked docs only when the ledger is meant to be maintainer-facing; otherwise keep it as local continuity material.
 - If the user sets a read-only, no-file-changes, or no-ledger-write boundary, do not create or update a ledger file unless the user grants that specific write. Keep the same ledger fields in chat, task plan, or final handoff instead.
-- The ledger is the control-plane state, not a transcript. Keep only: objective, done criteria, user boundaries, current phase, branch/cwd, last completed step, next action, source docs, spawned agents, required review gates, verification commands, verification status, decisions, and resume protocol.
-- Goal text, implementation plans, and subagent prompts should point to the ledger when it exists. After compact, resume, or new-session handoff, read the ledger before relying on transcript memory. Ledger state outranks remembered agent/gate status.
+- Once a ledger exists for the current task, the task is in ledger mode. The ledger is the control-plane source for context management, recovery, and progress; it is not an optional note written once and forgotten.
+- In ledger mode, read or refresh the ledger before resuming after compact, handoff, or a new session; before continuing from a pending gate; before integrating subagent results; and before the final response. Use the ledger as the recovery entry point, then verify factual claims against source code, commands, logs, Git history, or other authoritative evidence.
+- The ledger is state, not a transcript. Keep only: objective, done criteria, user boundaries, current phase, branch/cwd, last completed step, next action, source docs, spawned agents, required review gates, verification commands, verification status, decisions, and resume protocol.
+- Goal text, implementation plans, and subagent prompts must point to the ledger when it exists. Subagents report status that can be folded back into the ledger; main owns the ledger update and integration.
 - Update the ledger before compact or handoff, after spawning an agent, after receiving agent results, when a required gate changes state, after a meaningful implementation slice, after verification, and before the final response. Do not paste raw logs or large diffs; link to source files, commands, or summarized evidence.
+- Write ledger content in the task's working language unless the project requires another language. For Chinese tasks, write the ledger in Chinese instead of copying the English schema labels verbatim.
 - If the ledger says a required gate is pending, blocked, or unresolved, do not claim completion until the gate is resolved, replaced with equivalent evidence, or explicitly waived by the user.
 
-Minimum ledger shape:
+Minimum ledger shape, translated to the task language when useful:
 
 ```markdown
 # <Task> Session Ledger
